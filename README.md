@@ -1,89 +1,98 @@
-# Yüzey Kimyası Optimizasyonu için Tepki Yüzeyi Metodolojisi (RSM) Uygulaması
+# Yüzey Kimyası Optimizasyonu (RSM) Projesi
 
-Bu proje, dört ana sürecin (TON, TOFF, SV, IP) Yüzey Kimyası (SC) üzerindeki etkileşimlerini analiz etmek ve SC'yi maksimize eden optimum çalışma koşullarını belirlemek için **Tepki Yüzeyi Metodolojisi (RSM)** kullanılarak yapılan istatistiksel modelleme çalışmasını kapsamaktadır.
-
----
-
-##  Projenin Amacı
-
-- **Model Geliştirme:** SC yanıtı ile süreç değişkenleri (TON, TOFF, SV, IP) arasındaki ilişkiyi, Birinci Derece (FO) ve İki Yönlü Etkileşim (TWI) terimlerini içeren bir matematiksel modelle tanımlamak.  
-- **Optimizasyon:** Yüzey Kimyası (SC) değerini en yüksek seviyeye çıkaracak optimum kodlanmış ve kodlanmamış (orijinal) süreç değişkeni değerlerini belirlemek.  
-- **Model Doğrulama:** Geliştirilen modelin istatistiksel varsayımlarını (normallik, varyans homojenliği) kontrol etmek ve aykırı/etkili gözlemleri tespit edip temizlemek.  
-- **Görselleştirme:** Elde edilen tepki yüzeylerini 2D kontur ve 3D grafiklerle görselleştirerek değişkenlerin SC üzerindeki etkileşimini anlaşılır kılmak.
+Bu proje, dört temel süreç değişkeni (**TON, TOFF, SV, IP**) ile **Yüzey Kimyası (SC)** arasındaki etkileşimleri analiz etmek ve SC değerini maksimize eden optimum çalışma koşullarını belirlemek amacıyla geliştirilmiş **Tepki Yüzeyi Metodolojisi (RSM)** tabanlı istatistiksel modellemeyi kapsamaktadır.  
 
 ---
 
-##  Kullanılan Yöntem ve Veri Analizi
+## Proje Problemi ve Amacı
 
-### 1. Veri Hazırlığı ve Dönüşüm
-- SC yanıtı için pozitiflik kontrolü yapıldı: `any(data$SC <= 0)`.  
-- Modelin varsayımlarını daha iyi sağlamak ve verinin dağılımını normalleştirmek amacıyla **yanıt değişkeni olarak doğal logaritma dönüşümü** uygulandı: `log(SC)`. (Box-Cox eğrisi ile desteklenmiştir)  
-- Tüm tahmin edici değişkenler (TON, TOFF, SV, IP) **standart sapmaya dayalı kodlanmış** değerlere dönüştürüldü (merkezlenmiş ve ölçeklenmiş).
+### Problem
+- SC üretim sürecindeki değişkenler arasındaki karmaşık etkileşimler, doğrudan gözlemlerle belirlenemiyor.  
+- Optimum SC koşullarını deneysel olarak bulmak maliyetli ve zaman alıcı.  
 
-### 2. İstatistiksel Modelleme (RSM)
-- Model denklemi:  
+### Çözüm
+- **RSM kullanılarak matematiksel modelleme** ile SC yanıtını süreç değişkenleri ile ilişkilendirmek.  
+- **Kanonik analiz ve optimizasyon** ile SC’yi maksimize eden koşulları belirlemek.  
+- Aykırı değerleri temizleyip model güvenilirliğini artırmak.  
 
-\[
-\log(SC) \sim \beta_0 + \sum \beta_i x_i + \sum \sum \beta_{ij} x_i x_j
-\]  
-
-- Model, `rsm` paketi ile oluşturuldu ve anlamlılık için `summary(model)` ile **ANOVA** ve katsayı tabloları incelendi.
-
-### 3. Tanısal Kontrol ve Aykırı Değer Temizliği
-- Artık grafikler ve **Cook's Distance** grafikleri incelendi.  
-- Q-Q Residuals grafiği, artıklarda hafif bir sapma olduğunu gösterdi.  
-- Residuals vs Fitted ve Scale-Location grafikleri, varyans homojenliği varsayımında hafif bir ihlal olduğunu gösterdi.  
-- `∣Studentized Residuals∣ > 2` olan gözlemler **aykırı değer** olarak tespit edildi ve modelden çıkarıldı.  
-- Aykırı değerler çıkarıldıktan sonra model (`model_no_out`) yeniden incelendi.
-
-### 4. Kanonik Analiz ve Optimizasyon
-- Temizlenmiş model için `canonical()` fonksiyonu ile kanonik analiz yapıldı.  
-- Analiz sonucunda **istasyonel nokta (optimum)**, kodlanmış ve orijinal değişkenler cinsinden hesaplandı.
+### Projenin Hedefleri
+1. SC yanıtını süreç değişkenleri (**TON, TOFF, SV, IP**) ile ilişkilendiren model geliştirmek.  
+2. SC’yi maksimize eden optimum kodlanmış ve orijinal (kodlanmamış) değişken değerlerini bulmak.  
+3. Modelin varsayımlarını kontrol etmek ve aykırı/etkili gözlemleri temizlemek.  
+4. 2D kontur ve 3D grafiklerle değişkenlerin SC üzerindeki etkisini görselleştirmek.  
 
 ---
 
-##  Temel Bulgular ve Çıktılar
+##  Kullanılan Yöntemler ve Analiz
 
-### 1. Optimizasyon Sonuçları
-| Değişken | Kodlanmış Optimum Değer | Orijinal (Kodlanmamış) Optimum Değer |
-|----------|------------------------|-------------------------------------|
-| TON      | TON.c_opt              | TON_opt                             |
-| TOFF     | TOFF.c_opt             | TOFF_opt                            |
-| SV       | SV.c_opt               | SV_opt                              |
-| IP       | IP.c_opt               | IP_opt                              |
+1. **Veri Hazırlığı ve Dönüşüm**
+   - SC yanıtı pozitiflik kontrolü: `any(data$SC <= 0)`  
+   - Yanıt değişkeni: `log(SC)` (Box-Cox ile doğrulandı)  
+   - Tahmin ediciler (**TON, TOFF, SV, IP**) merkezlenip ölçeklendi (kodlanmış değerler)  
 
-> Not: Sayısal değerler proje çıktılarında (`stationary_uncoded`) verilmiştir. Bu değerler SC'yi maksimize eden süreç koşullarını göstermektedir.
+2. **İstatistiksel Modelleme**
+   - Model denklemi:  
+     \[
+     \log(SC) \sim \beta_0 + \sum \beta_i x_i + \sum \sum \beta_{ij} x_i x_j
+     \]  
+   - `rsm` paketi ile model oluşturuldu, ANOVA ve katsayı tabloları incelendi.  
 
-### 2. Görselleştirme (Contour ve 3D Plot)
-- **Kontur Grafiği:** TON ve TOFF değişkenlerinin SC üzerindeki birlikte etkisi gösterilir.  
-  - Renkler, `log(SC)` değerlerini temsil eder (Mor → En Yüksek SC, Sarı/Yeşil → En Düşük SC).  
-  - Optimum nokta kırmızı ile işaretlenmiştir.  
-- **3D Yüzey Grafiği:** Tepki yüzeyinin fiziksel şeklini anlamaya yardımcı olur.  
-  - Yüzeydeki eğrilik, değişkenlerin etkileşimlerini sezgisel olarak gösterir.
+3. **Model Tanılama ve Aykırı Değer Temizliği**
+   - ∣Studentized Residuals∣ > 2 olan 11 gözlem çıkarıldı.  
+   - Cook’s Distance ve artık grafikleri ile modelin güvenilirliği kontrol edildi.  
 
-### 3. Modelin Güçlenmesi
-- Aykırı değerlerin çıkarılması, modelin istatistiksel gücünü artırdı.  
-- Cook's Distance grafiği ile kalan gözlemlerin model üzerindeki etkisi kontrol altına alındı.
+4. **Kanonik Analiz ve Optimizasyon**
+   - `canonical()` fonksiyonu ile yüzey şekli ve istasyonel nokta belirlendi.  
+   - Kodlanmış ve orijinal değişken değerleriyle optimum koşullar hesaplandı.  
 
 ---
 
-##  Sonuç
-Bu çalışma, Yüzey Kimyası (SC) yanıtını kontrol eden karmaşık etkileşimleri **RSM** ile başarıyla modellemiştir.  
-Belirlenen optimum koşullar:
+## Temel Bulgular
 
-\[
-TON_{opt}, TOFF_{opt}, SV_{opt}, IP_{opt}
-\]
+### Optimum Koşullar
 
-süreç parametrelerinin SC'yi maksimize etmek için hangi seviyelerde ayarlanması gerektiğini bilimsel ve pratik olarak göstermektedir.
+| Değişken | Kodlanmış Değer | Orijinal Değer |
+|----------|----------------|----------------|
+| TON      | -1.722         | 6.066          |
+| TOFF     | -0.652         | 59.200         |
+| SV       | -1.132         | 46.661         |
+| IP       | -1.908         | 65.921         |
+
+- Tahmini **SC**: `SC_pred ≈ 34.55`  
+- Eigenvalue analizi: karışık işaretler → **saddle point / stationary ridge**  
+
+---
+
+## Görselleştirme
+
+- **Kontur Grafiği:** TON ve TOFF’in SC üzerindeki etkisi.  
+  ![Kontur Grafiği](images/5_Contour_SC.png)  
+
+- **3D Yüzey Grafiği:** Tepki yüzeyi ve değişken etkileşimleri.  
+  ![3D Yüzey Grafiği](images/7_3D_SC.png)  
+
+- **Model Tanısı:**  
+  - Box-Cox: ![Box-Cox](images/3_BoxCox_Cleaned.png)  
+  - Cook's Distance: ![Cook's Distance](images/2_CooksDistance_Initial.png)  
+  - Artık Grafikleri: ![Residuals](images/8_Model_Diagnostics_Cleaned.png)  
+
+---
+
+## Çıkarımlar ve Katkılar
+
+- Aykırı gözlemlerin çıkarılması, modelin güvenilirliğini artırdı  
+- SC üretim sürecindeki karmaşık değişken etkileşimleri başarıyla modellendi  
+- Optimum koşullar, bilimsel ve pratik karar alma süreçlerinde yol gösterici  
+- RSM ile optimizasyonun endüstriyel süreçlerde uygulanabilirliğini kanıtladı  
 
 ---
 
 ## Kurulum ve Kullanım
 
-### Gereken R Paketleri
+### Gerekli R Paketleri
 ```r
-install.packages(c("rsm","readxl","ggplot2","dplyr","MASS"))
+install.packages(c("rsm", "readxl", "ggplot2", "dplyr", "MASS"))
+
 library(rsm)
 library(readxl)
 library(ggplot2)
